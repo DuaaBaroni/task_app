@@ -1,16 +1,17 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, unused_import, unnecessary_null_comparison
+// ignore_for_file: prefer_const_constructors
 
-import 'dart:io';
-
+import 'package:date_picker_timeline/date_picker_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:hive/hive.dart';
-import 'package:taskkkk_app/core/constants/assets_img.dart';
-import 'package:taskkkk_app/core/functions/navigation.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 import 'package:taskkkk_app/core/utils/color.dart';
 import 'package:taskkkk_app/core/utils/style.dart';
-import 'package:taskkkk_app/core/widgets/custom_btn.dart';
-import 'package:taskkkk_app/features/Add_Task/presentation/view/add_task.dart';
+import 'package:taskkkk_app/features/Add_Task/data/task_model.dart';
+import 'package:taskkkk_app/features/Home/presentation/widget/home_header.dart';
+import 'package:taskkkk_app/features/Home/presentation/widget/task_item.dart';
+import 'package:taskkkk_app/features/Home/presentation/widget/today_header.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -20,47 +21,131 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
+  String _selectedValue = DateFormat("dd/MM/yyyy").format(DateTime.now());
   @override
   Widget build(BuildContext context) {
-    var box = Hive.box("user");
-    String path = box.get("image");
+    final theme = Theme.of(context).colorScheme;
     return SafeArea(
       child: Scaffold(
-         body: Padding(
-           padding: const EdgeInsets.all(17),
-           child: Column(
+        body: Padding(
+          padding: const EdgeInsets.all(15),
+          child: Column(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                     children: [
-                      Text("Hello, ${box.get("name")} ", style:getTitleStyle()),
-                      Gap(3),
-                      Text("Have a Nice Day", style:getSmallStyle()),
-                     ],
-                  ),
-                  CircleAvatar(
-                       radius: 30,
-                        backgroundImage: (box!= null)
-                    ? FileImage(File(path)) as ImageProvider
-                    : AssetImage(AssetsImg.appUser),
-                  ),
-                ],
+              HomeHeader(),
+              Gap(20),
+              TodayHeader(),
+              Gap(20),
+              DatePicker(
+                DateTime.now(),
+                height: 100,
+                width: 80,
+                initialSelectedDate: DateTime.now(),
+                selectionColor: AppColor.primary,
+                selectedTextColor: Colors.white,
+                dayTextStyle: getSmallStyle(color: theme.onSurface),
+                dateTextStyle: getBodyStyle(),
+                monthTextStyle: getSmallStyle(color: theme.onSurface),
+                onDateChange: (date) {
+                  setState(() {
+                    _selectedValue = DateFormat("dd/MM/yyyy").format(date);
+                  });
+                },
               ),
-                Gap(15),
-                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                   children: [
-                     CustomButton(text: "+Add Task", onPressed: (){
-                      navigateTo(context, AddTaskView());
-                   }, width: 150, style: getBodyStyle(fontSize: 16)),
-                 ],
+              const Gap(20),
+              Expanded(
+                child: ValueListenableBuilder<Box<TaskModel>>(
+                  valueListenable: Hive.box<TaskModel>('task').listenable(),
+                  builder: (context, Box<TaskModel> box, child) {
+                    List<TaskModel> tasks = [];
+                    for (var element in box.values) {
+                      if (element.date == _selectedValue) {
+                        tasks.add(element);
+                      }
+                    }
+                    if (tasks.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Lottie.asset("assets/empty.json", width: 250),
+                             Gap(20),
+                             Text("You dont have any tasks yet!"),
+                             Text("Add new tasks to make yhour days productive")
+                          ],
+                        ),
+                      );
+                    }
+                    return ListView.separated(
+                      itemCount: tasks.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Dismissible(
+                          key: UniqueKey(),
+                          secondaryBackground: Container(
+                            padding: const EdgeInsets.all(20),
+                            color: Colors.red,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Icon(
+                                  Icons.delete,
+                                  color: AppColor.white,
+                                ),
+                                const Gap(5),
+                                Text(
+                                  'Delete',
+                                  style: getBodyStyle(color: AppColor.white),
+                                ),
+                              ],
+                            ),
+                          ),
+                          background: Container(
+                            padding: const EdgeInsets.all(20),
+                            color: Colors.green,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.check,
+                                  color: AppColor.white,
+                                ),
+                                const Gap(5),
+                                Text(
+                                  'Complete',
+                                  style: getBodyStyle(color: AppColor.white),
+                                ),
+                              ],
+                            ),
+                          ),
+                          onDismissed: (direction) {
+                            if (direction == DismissDirection.startToEnd) {
+                              // compete this task with its key
+                              box.put(
+                                  tasks[index].id,
+                                  TaskModel(
+                                      id: tasks[index].id,
+                                      title: tasks[index].title,
+                                      note: tasks[index].note,
+                                      date: tasks[index].date,
+                                      startTime: tasks[index].startTime,
+                                      endTime: tasks[index].endTime,
+                                      color: 3,
+                                      isComplete: true));
+                            } else {
+                              box.delete(tasks[index].id);
+                            }
+                          },
+                          child: TaskItem(
+                            model: tasks[index],
+                          ),
+                        );
+                      },
+                      separatorBuilder: (context, index) => const Gap(10),
+                    );
+                  },
+                ),
               ),
             ],
-           ),
-         )
+          ),
+        ),
       ),
     );
   }

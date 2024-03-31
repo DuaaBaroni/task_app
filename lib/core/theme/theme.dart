@@ -5,11 +5,11 @@ import 'package:taskkkk_app/core/utils/color.dart';
 import 'package:taskkkk_app/core/utils/style.dart';
 
 class AppThemes {
-  static ThemeData appLightTheme = ThemeData(
+  ThemeData appLightTheme = ThemeData(
       scaffoldBackgroundColor: AppColor.white,
       appBarTheme: AppBarTheme(
           backgroundColor: AppColor.white, foregroundColor: AppColor.primary),
-         colorScheme: ColorScheme.fromSeed(
+      colorScheme: ColorScheme.fromSeed(
           primary: AppColor.primary,
           background: AppColor.white,
           onSurface: AppColor.black,
@@ -18,7 +18,6 @@ class AppThemes {
       datePickerTheme: DatePickerThemeData(
         backgroundColor: AppColor.white,
       ),
-
       timePickerTheme: TimePickerThemeData(backgroundColor: AppColor.white),
       inputDecorationTheme: InputDecorationTheme(
           hintStyle: getSmallStyle(),
@@ -27,22 +26,16 @@ class AppThemes {
           contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
           enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: AppColor.primary)
-              ),
+              borderSide: BorderSide(color: AppColor.primary)),
           focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: AppColor.primary)
-              ),
+              borderSide: BorderSide(color: AppColor.primary)),
           errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: AppColor.pink)
-              ),
+              borderSide: BorderSide(color: AppColor.pink)),
           focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: AppColor.pink)
-              )
-              )
-              );
+              borderSide: BorderSide(color: AppColor.pink))));
   static ThemeData appDarkTheme = ThemeData(
       scaffoldBackgroundColor: AppColor.dark,
       datePickerTheme: DatePickerThemeData(backgroundColor: AppColor.dark),

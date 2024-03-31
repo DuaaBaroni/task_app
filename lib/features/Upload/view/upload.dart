@@ -8,6 +8,7 @@ import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:taskkkk_app/core/constants/assets_img.dart';
 import 'package:taskkkk_app/core/functions/navigation.dart';
+import 'package:taskkkk_app/core/services/local_storage.dart';
 import 'package:taskkkk_app/core/utils/style.dart';
 import 'package:taskkkk_app/core/widgets/custom_btn.dart';
 import 'package:taskkkk_app/features/Add_Task/presentation/view/add_task.dart';
@@ -29,7 +30,7 @@ class _UploadViewState extends State<UploadView> {
   
   @override
   Widget build(BuildContext context) {
-    var box = Hive.box("user");
+    
     return Scaffold(
        appBar: AppBar(
         actions: [
@@ -37,9 +38,9 @@ class _UploadViewState extends State<UploadView> {
               onPressed: () {
                 if (path != null && name.isNotEmpty) {
                   navigateWithReplacement(context, HomeView());
-                  box.put("name", name);
-                  box.put("image", path);
-                  box.put("isUpload", true);
+                  AppLocalStorage.cachData("name", name);
+                  AppLocalStorage.cachData("image", path);
+                  AppLocalStorage.cachData("isUpload", true);
                 } else if (path != null && name.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text("please enter your name")));
@@ -54,7 +55,7 @@ class _UploadViewState extends State<UploadView> {
                 
                 }
               },
-              child: const Text('Done', style: TextStyle(fontSize: 18)),
+              child: const Text('Done ', style: TextStyle(fontSize: 18)),
               ),
         ],
       ),
