@@ -26,7 +26,7 @@ class _SplashState extends State<Splash> {
     bool isUpload = box.get("isUpload") ?? false;
  Future.delayed(const Duration(seconds: 3), (){
     setState(() {
-      navigateWithReplacement(context, isUpload? HomeView() :UploadView());
+      navigateWithReplacement(context, isUpload? HomeView(page: 3,) :UploadView());
     });
       
     });

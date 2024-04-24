@@ -225,7 +225,7 @@ class _AddTaskViewState extends State<AddTaskView> {
                             endTime: endTime,
                             color: color,
                             isComplete: false));
-                    navigateWithReplacement(context, const HomeView());
+                    navigateWithReplacement(context, const HomeView(page: 3,));
                   },
                   style: Text(""),
                 )

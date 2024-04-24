@@ -1,13 +1,17 @@
-// ignore_for_file: unused_local_variable, prefer_const_constructors
+// ignore_for_file: use_build_context_synchronously, prefer_const_constructors
 
 import 'dart:io';
+
+import 'package:date_picker_timeline/extra/color.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:taskkkk_app/core/functions/navigation.dart';
 import 'package:taskkkk_app/core/services/local_storage.dart';
 import 'package:taskkkk_app/core/utils/color.dart';
 import 'package:taskkkk_app/core/utils/style.dart';
-import 'package:taskkkk_app/features/Upload/view/upload.dart';
+import 'package:taskkkk_app/core/widgets/custom_btn.dart';
+import 'package:taskkkk_app/features/Home/presentation/view/home_view.dart';
 
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
@@ -17,103 +21,221 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
-  late Box<bool> modeBox;
+  late String name;
+  late String image;
   @override
   void initState() {
+    image = AppLocalStorage.getCachData('image');
+    name = AppLocalStorage.getCachData('name');
     super.initState();
-    modeBox = Hive.box("mode");
-    AppLocalStorage.getCachData(AppLocalStorage.getCachData(name))
-        .then((value) {
-      setState(() {
-        name = value;
-      });
-    });
   }
+
   @override
   Widget build(BuildContext context) {
-    bool? isDark = modeBox.get("darkmode");
-    final theme = Theme.of(context).colorScheme;
-
-    final box = Hive.box('user');
-    var darkMode = box.get('darkMode') ?? false;
     return Scaffold(
       appBar: AppBar(
-        foregroundColor: AppColor.primary,
+        title: const Text('Profile'),
         actions: [
           IconButton(
-            onPressed: () {
-              box.put('darkMode', !darkMode);
-            },
+            onPressed: () {},
             icon: Icon(
-              darkMode ? Icons.dark_mode_rounded : Icons.light_mode_outlined,
+              Icons.dark_mode_rounded,
+              //color: AppColors.green ,
             ),
-          ),
+          )
         ],
       ),
       body: Center(
-        child: ValueListenableBuilder(
-          valueListenable: Hive.box('user').listenable(),
-          builder: (context, box, child) {
-            String path = box.get('image') ?? '';
-            String? name = box.get('name') ?? '';
-            return Padding(
-              padding: const EdgeInsets.all(20),
+          child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Stack(
+            children: [
+              ClipRRect(
+                  borderRadius: BorderRadius.circular(360),
+                  child: Image.file(
+                    File(image),
+                    width: 120,
+                    height: 120,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        'assets/user.png',
+                        width: 50,
+                      );
+                    },
+                  )),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: GestureDetector(
+                  onTap: () async {
+                    await updateProfileImage(context);
+                  },
+                  child: CircleAvatar(
+                    radius: 18,
+                    foregroundColor: AppColor.white,
+                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                    child:  Icon(Icons.camera_alt, color: AppColor.primary,),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const Gap(30),
+          Divider(
+            indent: 30,
+            endIndent: 30,
+            color: AppColor.white,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(30),
+            child: Row(
+              children: [
+                Text(
+                  name,
+                  style: getTitleStyle(),
+                ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: () {
+                    updateProfileName(context, name);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColor.grey)),
+                    child: Icon(
+                      Icons.edit,
+                      color: AppColor.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
+      )),
+    );
+  }
+
+  Future<dynamic> updateProfileImage(BuildContext context) {
+    return showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColor.grey,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(25), topRight: Radius.circular(25)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          width: double.infinity,
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(25)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CustomButton(
+                height: 50,
+                width: double.infinity,
+                text: 'Upload From Camera',
+                onPressed: () async {
+                  await ImagePicker()
+                      .pickImage(source: ImageSource.camera)
+                      .then((value) {
+                    if (value != null) {
+                      AppLocalStorage.cachData('image', value.path);
+                    }
+                  });
+                  Navigator.pop(context);
+                  navigateWithReplacement(
+                      context,
+                      const HomeView(
+                        page: 3,
+                      ));
+                },
+                style: '',
+              ),
+              const Gap(20),
+              CustomButton(
+                height: 50,
+                width: double.infinity,
+                text: 'Upload From Gallery',
+                onPressed: () {},
+                style: '',
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  updateProfileName(context, name) {
+    var formkey = GlobalKey<FormState>();
+    var textCon = TextEditingController(text: name);
+    showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(25), topRight: Radius.circular(25)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: MediaQuery.of(context).viewInsets,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+            decoration: const BoxDecoration(
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(25),
+                    topRight: Radius.circular(25))),
+            child: Form(
+              key: formkey,
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Stack(
-                    children: [
-                      CircleAvatar(
-                          radius: 80,
-                          backgroundImage: path.isNotEmpty
-                              ? FileImage(File(path)) as ImageProvider
-                              : const AssetImage('assets/user.png')),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: InkWell(
-                          onTap: () {},
-                          child: CircleAvatar(
-                              radius: 20,
-                              backgroundColor: theme.background,
-                              foregroundColor: AppColor.primary,
-                              child: const Icon(Icons.camera_alt_rounded)),
-                        ),
-                      )
-                    ],
+                  TextFormField(
+                    controller: textCon,
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Name is found';
+                      }
+                      return null;
+                    },
+                    style: getBodyStyle(color: AppColor.primary),
+                    decoration: const InputDecoration(
+                      hintText: 'Enter Your Name',
+                    ),
                   ),
-                  Gap(30),
-                  Divider(
-                    color: AppColor.primary,
+                  const SizedBox(
+                    height: 20,
                   ),
-                  Gap(30),
-                  Row(
-                    children: [
-                      Text(
-                        name!,
-                        style: getTitleStyle(color: AppColor.primary),
-                      ),
-                      const Spacer(),
-                      InkWell(
-                        onTap: () {},
-                        child: CircleAvatar(
-                          radius: 18,
-                          backgroundColor: AppColor.primary,
-                          child: CircleAvatar(
-                              radius: 17,
-                              backgroundColor: theme.background,
-                              foregroundColor: AppColor.primary,
-                              child: Icon(Icons.edit)),
-                        ),
-                      ),
-                    ],
-                  )
+                  CustomButton(
+                    width: double.infinity,
+                    text: 'Update Name',
+                    onPressed: () {
+                      if (formkey.currentState!.validate()) {
+                        AppLocalStorage.cachData('name', textCon.text);
+                        Navigator.pop(context);
+                        navigateWithReplacement(
+                            context,
+                            const HomeView(
+                              page: 3,
+                            ));
+                      }
+                    },
+                    style: '',
+                  ),
                 ],
               ),
-            );
-          },
-        ),
-      ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

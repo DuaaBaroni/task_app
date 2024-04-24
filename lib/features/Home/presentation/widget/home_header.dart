@@ -43,8 +43,8 @@ class _HomeHeaderState extends State<HomeHeader> {
               style: getTitleStyle(color: AppColor.primary),
             ),
             Text(
-              'Have A Noce Day !',
-              style: getBodyStyle(
+              'Have A Nice Day !',
+              style: getSmallStyle( color: AppColor.black
               ),
             ),
           ],

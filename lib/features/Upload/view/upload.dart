@@ -37,7 +37,7 @@ class _UploadViewState extends State<UploadView> {
           TextButton(
               onPressed: () {
                 if (path != null && name.isNotEmpty) {
-                  navigateWithReplacement(context, HomeView());
+                  navigateWithReplacement(context, HomeView(page: 3,));
                   AppLocalStorage.cachData("name", name);
                   AppLocalStorage.cachData("image", path);
                   AppLocalStorage.cachData("isUpload", true);
@@ -65,7 +65,7 @@ class _UploadViewState extends State<UploadView> {
           children: [
              CircleAvatar(
                 backgroundImage: (path != null)
-                    ? FileImage(File(path!)) as ImageProvider
+                    ?  FileImage(File(path!)) as ImageProvider
                     : AssetImage(AssetsImg.appUser),
                     radius: 70,
               ),

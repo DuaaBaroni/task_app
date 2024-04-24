@@ -14,7 +14,7 @@ import 'package:taskkkk_app/features/Home/presentation/widget/task_item.dart';
 import 'package:taskkkk_app/features/Home/presentation/widget/today_header.dart';
 
 class HomeView extends StatefulWidget {
-  const HomeView({super.key});
+  const HomeView({super.key, required int page});
 
   @override
   State<HomeView> createState() => _HomeViewState();
